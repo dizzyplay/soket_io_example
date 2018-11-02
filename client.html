@@ -1,0 +1,51 @@
+<body>
+<div>
+    <input id="data-input" type="text" size="100"/><br>
+    <input id="data-submit" type="button" value="send" onclick="sendMessage()"/>
+</div>
+
+<div id="chatBox">
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+
+<script>
+    //연결
+    let socket =
+        io.connect('http://localhost');
+
+    //연결후 서버로부터 메세지를 받는 부분
+    socket.on('start',
+        function (data) {
+            console.log(data);
+            socket.emit('connect_success',
+                {connect_state: 'connect success!!!'});
+        })
+
+    //서버로부터 메세지를 받는 부분
+    socket.on('serverMessage', function (data) {
+        let chat = document.getElementById('chatBox')
+        let para = document.createElement("p");
+        let textNode = document.createTextNode(data)
+        para.appendChild(textNode)
+        chat.appendChild(para)
+    })
+
+    // 서버로 메세지를 보낸다
+    window.addEventListener("load", function (e) {
+        let inputBox = document.getElementById('data-input')
+        inputBox.addEventListener('keyup', function (e) {
+            let key=e.key;
+            if(key === 'Enter'){
+                sendMessage()
+            }
+        })
+    }, false)
+
+    function sendMessage() {
+        let userData = document.getElementById('data-input')
+        socket.emit('receiver', userData.value)
+        userData.value = "";
+        userData.focus();
+    }
+</script>
+</body>
